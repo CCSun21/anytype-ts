@@ -56,8 +56,9 @@ elif [[ "$OS" =~ ^macos-.*$ ]]; then
     OS_ARCH="darwin-${ARCH}64"
     FOLDER="darwin-${ARCH}"
 elif [[ "$OS" =~ ^windows-.*$ ]]; then
-    OS_ARCH="windows-amd64"
-    FOLDER="dist"
+    [[ -z "$ARCH" ]] && ARCH="amd"
+    OS_ARCH="windows-${ARCH}64"
+    FOLDER="windows-${ARCH}"
     ARCHIVE_SUFFIX="zip"
 else
     echo "Unsupported OS='$OS'" 1>&2
@@ -112,6 +113,8 @@ if [[ "$OS" =~ ^windows-.*$ ]]; then
     echo "Done"
 
     echo "Moving... "
+    rm -rf "$FOLDER"
+    mkdir -p "$FOLDER"
     mv -fv grpc-server.exe "$FOLDER/anytypeHelper.exe"
 else
     echo -n "Uncompressing... "

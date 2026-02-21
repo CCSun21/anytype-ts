@@ -327,11 +327,12 @@ jobs:
           patch electron/js/lib/installNativeMessagingHost.js < nightly/patches/installNativeMessagingHost.js.patch
           rsync -a nightly/electron/ electron/
 
-      - name: Update Addon only AMD
+      - name: Update Addon AMD and ARM (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
         shell: bash
         run: |
-          ./update-ci.sh --user="${{secrets.USER}}" --token="${{secrets.TOKEN}}" --os="${{matrix.os}}" --middleware-version="${{env.MIDDLEWARE_VERSION}}"
+          ./update-ci.sh --user="${{secrets.USER}}" --token="${{secrets.TOKEN}}" --os="${{matrix.os}}" --middleware-version="${{env.MIDDLEWARE_VERSION}}" --arch="arm"
+          ./update-ci.sh --user="${{secrets.USER}}" --token="${{secrets.TOKEN}}" --os="${{matrix.os}}" --middleware-version="${{env.MIDDLEWARE_VERSION}}" --arch="amd"
 
       - name: Update Addon AMD and ARM
         if: ${{ !startsWith(matrix.os, 'windows-') }}
@@ -342,7 +343,9 @@ jobs:
 
       - name: Build Native Messaging Host Windows
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        run: npm run build:nmh-win
+        run: |
+          npm run build:nmh-win-arm
+          npm run build:nmh-win-amd
         env:
           CGO_ENABLED: 0
 
@@ -378,7 +381,7 @@ jobs:
         with:
           github_token: ${{secrets.TOKEN}}
           release: true
-          args: --publish always --config.publish.provider=s3 --config.publish.bucket=${{ env.S3_BUCKET }} --config.publish.region=${{ secrets.NIGHTLY_AWS_REGION }}
+          args: ${{ startsWith(matrix.os, 'windows-') && '--arm64 --x64 --publish always' || '--publish always' }} --config.publish.provider=s3 --config.publish.bucket=${{ env.S3_BUCKET }} --config.publish.region=${{ secrets.NIGHTLY_AWS_REGION }}
         env:
           DEBUG: electron-builder
           USE_HARD_LINKS: false
