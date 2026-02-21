@@ -115,11 +115,12 @@ jobs:
       #- name: Update Deps
       #  run: npm run build:deps
 
-      - name: Update Addon only AMD
+      - name: Update Addon AMD and ARM (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
         shell: bash
         run: |
-          ./update-ci.sh --user="${{secrets.USER}}" --token="${{secrets.TOKEN}}" --os="${{matrix.os}}" --middleware-version="$( cat middleware.version )"
+          ./update-ci.sh --user="${{secrets.USER}}" --token="${{secrets.TOKEN}}" --os="${{matrix.os}}" --middleware-version="$( cat middleware.version )" --arch="arm"
+          ./update-ci.sh --user="${{secrets.USER}}" --token="${{secrets.TOKEN}}" --os="${{matrix.os}}" --middleware-version="$( cat middleware.version )" --arch="amd"
 
       - name: Update Addon AMD and ARM
         if: ${{ !startsWith(matrix.os, 'windows-') }}
@@ -130,7 +131,9 @@ jobs:
 
       - name: Build Native Messaging Host Windows
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        run: npm run build:nmh-win
+        run: |
+          npm run build:nmh-win-arm
+          npm run build:nmh-win-amd
         env:
           CGO_ENABLED: 0
 
@@ -164,6 +167,7 @@ jobs:
         with:
           github_token: ${{secrets.TOKEN}}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          args: ${{ startsWith(matrix.os, 'windows-') && '--arm64 --x64' || '' }}
         env:
           DEBUG: electron-builder
           USE_HARD_LINKS: false

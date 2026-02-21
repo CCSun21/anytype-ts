@@ -11,6 +11,9 @@ exports.default = async function (context) {
 	} else 
 	if (platform.name == 'linux') {
 		folder = `linux-${arch == 'arm64' ? 'arm' : 'amd'}`;
+	} else
+	if (platform.name == 'win') {
+		folder = `windows-${arch == 'arm64' ? 'arm' : 'amd'}`;
 	};
 
 	console.log('[BeforeBuild]: folder:', folder);
@@ -19,7 +22,7 @@ exports.default = async function (context) {
 		return;
 	};
 
-	const files = [ 'anytypeHelper', 'anytypeHelper.exe' ];
+	const files = [ 'anytypeHelper', 'anytypeHelper.exe', 'nativeMessagingHost.exe' ];
 
 	files.forEach(it => {
 		const src = `./${folder}/${it}`;
